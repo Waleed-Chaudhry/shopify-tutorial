@@ -7,6 +7,7 @@ import { authenticatedFetch } from "@shopify/app-bridge-utils";
 import { Redirect } from "@shopify/app-bridge/actions";
 import "@shopify/polaris/dist/styles.css";
 import translations from "@shopify/polaris/locales/en.json";
+import ClientRouter from "../components/ClientRouter";
 
 function userLoggedInFetch(app) {
   const fetchFunction = authenticatedFetch(app);
@@ -62,6 +63,7 @@ class MyApp extends App {
             shopOrigin: shopOrigin,
           }}
         >
+          <ClientRouter />
           <MyProvider Component={Component} {...pageProps} shopOrigin={shopOrigin}/>
         </Provider>
       </AppProvider>
