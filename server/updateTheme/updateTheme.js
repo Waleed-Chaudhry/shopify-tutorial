@@ -1,0 +1,89 @@
+import Axios from "axios";
+// import fs from "fs";
+// import path from "path";
+
+const themeApi = "admin/api/2021-01";
+
+export async function updateTheme(shop, accessToken) {
+  // Headers for the Axios Request
+  const axios = Axios.create({
+    baseURL: `https://${shop}/${themeApi}`,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": accessToken,
+    },
+  });
+
+  // Get Theme Id
+  const mainThemeId = await getThemeId(axios);
+  if (!mainThemeId) {
+    return;
+  }
+  console.log('Theme ID: ', mainThemeId)
+  // const newPage = await getAssetThemeLiquid(mainThemeId, axios);
+  // if (newPage) {
+  //   await uploadAssetTheme(axios, mainThemeId, newPage, "layout/theme.liquid");
+  // }
+  // const newSnippet = getFile("../../liquid/banner-app.liquid");
+  // await uploadAssetTheme(
+  //   axios,
+  //   mainThemeId,
+  //   newSnippet,
+  //   "snippets/banner-app.liquid"
+  // );
+}
+
+/* Helper function to get Main Theme Id */
+async function getThemeId(axios) {
+  // Implementing https://shopify.dev/api/admin-rest/2021-07/resources/theme#[post]/admin/api/2021-07/themes.json
+  const { data } = await axios.get("/themes.json");
+
+  // Filter out the main theme only
+  const mainTheme = data.themes.find((theme) => theme.role === "main");
+  if (!mainTheme) {
+    console.log("No main theme found");
+    return;
+  }
+  console.log('The main theme is: ', mainTheme)
+  return mainTheme.id;
+}
+
+
+// function getFile(fileName) {
+//   console.log("file", fileName);
+//   console.log("path", path.resolve(__dirname, fileName));
+//   const f = fs.readFileSync(path.resolve(__dirname, fileName), "utf-8");
+//   console.log(f);
+//   return f;
+// }
+// async function uploadAssetTheme(axios, id, page, pageName) {
+//   const body = {
+//     asset: {
+//       key: pageName,
+//       value: page,
+//     },
+//   };
+//   await axios.put(`/themes/${id}/assets.json`, body);
+//   console.log(`Upload page ${pageName}`);
+// }
+
+// async function getAssetThemeLiquid(id, axios) {
+//   const { data } = await axios.get(
+//     `/themes/${id}/assets.json?asset[key]=layout/theme.liquid`
+//   );
+//   console.log("Theme liquid file");
+//   if (!data.asset.value) {
+//     return;
+//   }
+//   const snippet = getFile("../../liquid/theme.liquid");
+//   let newPage = data.asset.value;
+//   if (newPage.includes(snippet)) {
+//     console.log("Page already has the snippet installed");
+//     return;
+//   }
+//   newPage = data.asset.value.replace(
+//     "{% section 'header' %}",
+//     `\n{% section 'header' %}\n${snippet}\n`
+//   );
+//   return newPage;
+// }
