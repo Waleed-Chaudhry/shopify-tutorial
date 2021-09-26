@@ -9,6 +9,19 @@ function install() {
   const titleDescription = isInstalled ? "Uninstall" : "Install";
   const bodyDescription = isInstalled ? "installed" : "uninstalled";
 
+  // Get all Script tags
+  async function fetchScriptTags() {
+    const { data } = await axios.get('/script_tag/all');
+    console.log("my initial script tag status: ", data);
+    setIsInstalled(data.installed);
+    // if (data.details.length > 0) {
+    //   setScriptTagId(data.details[0].id);
+    // }
+  }
+  useEffect(() => {
+    fetchScriptTags();
+  }, []);
+
   async function handleAction() {
     if (!isInstalled) {
       // script_tag is the prefix on server/router/script_tag.js

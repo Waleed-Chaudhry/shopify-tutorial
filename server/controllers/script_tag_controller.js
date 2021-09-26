@@ -39,3 +39,21 @@ export async function createScriptTag(shop, token) {
   }
 }
 
+export async function getAllScriptTags(shop, token, src) {
+  const url = getAllScriptTagsUrl(shop)
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': token
+    }
+  }
+
+  try {
+    const result = await axios.get(url, config);
+    // Make sure the src on the tag is whatever we provided on our install script
+    const matchSrc = result.data.script_tags.filter((tag) => tag.src === src);
+    return matchSrc;
+  } catch (err) {
+    console.log('Error getting script tags', err)
+  }
+}

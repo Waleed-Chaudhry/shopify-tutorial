@@ -3,7 +3,7 @@ import Router from "koa-router";
 import {
   createScriptTag,
   // deleteScriptTagById,
-  // getAllScriptTags,
+  getAllScriptTags,
 } from "../controllers/script_tag_controller";
 
 const router = new Router({ prefix: "/script_tag" });
@@ -15,12 +15,12 @@ router.get("/", async (ctx) => {
 });
 
 router.get("/all", async (ctx) => {
-  ctx.body = "Get script all tags";
-  // const result = await getAllScriptTags(ctx.myClient, "https://google.com/");
-  // ctx.body = {
-  //   installed: result.length > 0,
-  //   details: result,
-  // };
+  const { shop, accessToken } = ctx.sessionFromToken;
+  const result = await getAllScriptTags(shop, accessToken, "https://google.com/");
+  ctx.body = {
+    installed: result.length > 0,
+    details: result,
+  };
 });
 
 router.post("/", async (ctx) => {
