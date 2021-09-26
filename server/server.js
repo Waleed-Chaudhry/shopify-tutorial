@@ -19,13 +19,11 @@ const app = next({
 const handle = app.getRequestHandler();
 const FILENAME = "./session.json";
 function storeCallback(session) {
-  console.log("storeCallback ");
   fs.writeFileSync(FILENAME, JSON.stringify(session));
   return true;
 }
 
 function loadCallback(id) {
-  console.log("loadCallback ");
   if (fs.existsSync(FILENAME)) {
     const sessionResult = fs.readFileSync(FILENAME, "utf8");
     return Object.assign(new Session(), JSON.parse(sessionResult));
@@ -33,9 +31,7 @@ function loadCallback(id) {
   return false;
 }
 
-function deleteCallback(id) {
-  console.log("deleteCallback", id);
-}
+function deleteCallback(id) {}
 
 const sessionStorage = new Shopify.Session.CustomSessionStorage(
   storeCallback,
