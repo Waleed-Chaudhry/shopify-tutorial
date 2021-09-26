@@ -1,10 +1,10 @@
 import Router from "koa-router";
 
-// import {
-//   createScriptTag,
-//   deleteScriptTagById,
-//   getAllScriptTags,
-// } from "../controllers/script_tag_controller";
+import {
+  createScriptTag,
+  // deleteScriptTagById,
+  // getAllScriptTags,
+} from "../controllers/script_tag_controller";
 
 const router = new Router({ prefix: "/script_tag" });
 // prefix is just the value that comes after the url
@@ -24,9 +24,8 @@ router.get("/all", async (ctx) => {
 });
 
 router.post("/", async (ctx) => {
-  // console.log("create script tag", ctx.sesionFromToken);
-  // //const { shop, accessToken } = ctx.sesionFromToken;
-  // await createScriptTag(ctx.myClient);
+  const { shop, accessToken } = ctx.sessionFromToken;
+  await createScriptTag(shop, accessToken)
   ctx.body = "Create a script tag";
 });
 

@@ -87,6 +87,13 @@ app.prepare().then(async () => {
     }
   );
 
+  async function injectSession(ctx, next) {
+    const session = await Shopify.Utils.loadCurrentSession(ctx.req, ctx.res)
+    ctx.sessionFromToken = session;
+    return next(); //Make the application call the next middleware which will be our endpoint
+  }
+
+  server.use(injectSession);
   server.use(routes());
   router.get("(/_next/static/.*)", handleRequest); // Static content is clear
   router.get("/_next/webpack-hmr", handleRequest); // Webpack content is clear

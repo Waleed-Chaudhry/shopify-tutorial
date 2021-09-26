@@ -1,13 +1,30 @@
 import { Layout, Page, SettingToggle, TextStyle } from "@shopify/polaris";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useAppBridge } from '@shopify/app-bridge-react';
+import { getSessionToken } from "@shopify/app-bridge-utils";
 
 function install() {
+  const app = useAppBridge(); // to get the sessionToken in the request
+
   // State variables to track and display the installation status of the script
   const [isInstalled, setIsInstalled] = useState(null);
   const titleDescription = isInstalled ? "Uninstall" : "Install";
   const bodyDescription = isInstalled ? "installed" : "uninstalled";
 
-  function handleAction() {
+  async function handleAction() {
+    if (!isInstalled) {
+      const token = await getSessionToken(app)
+      // This log will be in the browser since install.js is the frontend
+      console.log('Token: ', token) 
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+      // script_tag is the prefix on server/router/script_tag.js
+      axios.post('/script_tag', {}, config);
+    // } else {
+    //   axios.delete(`https://il-shopify3.loca.lt/script_tag/?id=${scriptTagId}`);
+    }
     setIsInstalled((oldValue) => !oldValue);
   }
 
