@@ -13,6 +13,10 @@ function getAllScriptTagsUrl(shop) {
   return `${getBaseUrl(shop)}/admin/api/2021-01/script_tags.json`;
 }
 
+function getDeleteScriptTagUrl(shop, id) {
+  return `${getBaseUrl(shop)}/admin/api/2021-01/script_tags/${id}.json`;
+}
+
 /*
  * Implement the request defined within the shopify docs
  */
@@ -47,12 +51,28 @@ export async function getAllScriptTags(shop, token, src) {
       'X-Shopify-Access-Token': token
     }
   }
-
   try {
     const result = await axios.get(url, config);
     // Make sure the src on the tag is whatever we provided on our install script
     const matchSrc = result.data.script_tags.filter((tag) => tag.src === src);
     return matchSrc;
+  } catch (err) {
+    console.log('Error getting script tags', err)
+  }
+}
+
+
+export async function deleteScriptTagById(shop, token, id) {
+  const url = getDeleteScriptTagUrl(shop, id)
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': token
+    }
+  }
+  try {
+    const result = await axios.delete(url, config);
+    return result.data
   } catch (err) {
     console.log('Error getting script tags', err)
   }

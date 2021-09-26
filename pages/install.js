@@ -9,25 +9,31 @@ function install() {
   const titleDescription = isInstalled ? "Uninstall" : "Install";
   const bodyDescription = isInstalled ? "installed" : "uninstalled";
 
+  // Deleting the latest Script tag, assuming there is only one, given the app flow
+  // UseEffect stores the latest script tag in scriptTagId
+  // 
+  const [scriptTagId, setScriptTagId] = useState();
+
   // Get all Script tags
   async function fetchScriptTags() {
     const { data } = await axios.get('/script_tag/all');
-    console.log("my initial script tag status: ", data);
     setIsInstalled(data.installed);
-    // if (data.details.length > 0) {
-    //   setScriptTagId(data.details[0].id);
-    // }
+    if (data.details.length > 0) {
+      setScriptTagId(data.details[0].id);
+    }
   }
+  
+  // Called whenever isInstalled changes
   useEffect(() => {
     fetchScriptTags();
-  }, []);
+  }, [isInstalled]);
 
   async function handleAction() {
     if (!isInstalled) {
       // script_tag is the prefix on server/router/script_tag.js
       axios.post('/script_tag');
-    // } else {
-    //   axios.delete(`https://il-shopify3.loca.lt/script_tag/?id=${scriptTagId}`);
+    } else {
+      axios.delete(`script_tag?id=${scriptTagId}`);
     }
     setIsInstalled((oldValue) => !oldValue);
   }
