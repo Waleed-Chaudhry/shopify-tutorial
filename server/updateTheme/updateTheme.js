@@ -1,6 +1,6 @@
 import Axios from "axios";
-// import fs from "fs";
-// import path from "path";
+import fs from "fs";
+import path from "path";
 
 const themeApi = "admin/api/2021-01";
 
@@ -14,16 +14,23 @@ export async function updateTheme(shop, accessToken) {
     },
   });
 
-  // Get Theme Id
+  // Step 1: Get Theme Id
   const mainThemeId = await getThemeId(axios);
   if (!mainThemeId) {
     return;
   }
   console.log('Theme ID: ', mainThemeId)
-  // const newPage = await getAssetThemeLiquid(mainThemeId, axios);
-  // if (newPage) {
-  //   await uploadAssetTheme(axios, mainThemeId, newPage, "layout/theme.liquid");
-  // }
+
+  // Step 2: Get Asset layout theme.liquid form Shopify and add our snippet to it
+  const newPage = await getAssetThemeLiquid(mainThemeId, axios);
+
+  if (newPage) {
+    // Step 3: Upload the combined asset
+    await uploadAssetTheme(axios, mainThemeId, newPage, "layout/theme.liquid");
+  }
+
+  // Step 4: For the second snippet, we just need to upload
+  // No need to download an existing snippet and modtify that
   // const newSnippet = getFile("../../liquid/banner-app.liquid");
   // await uploadAssetTheme(
   //   axios,
@@ -48,42 +55,46 @@ async function getThemeId(axios) {
   return mainTheme.id;
 }
 
+/* Helper function to get the layout snippet theme.liquid and add our snippet to it*/
+async function getAssetThemeLiquid(id, axios) {
+  // Implementing https://shopify.dev/api/admin-rest/2021-07/resources/asset#[get]/admin/api/2021-07/themes/{theme_id}/assets.json
+  const { data } = await axios.get(
+    `/themes/${id}/assets.json?asset[key]=layout/theme.liquid`
+  );
+  if (!data.asset.value) {
+    return; // If you don't find the asset at all
+  }
+  // Read our liquid file
+  const snippet = getFile("../../liquid/theme.liquid");
+  let newPage = data.asset.value;
 
-// function getFile(fileName) {
-//   console.log("file", fileName);
-//   console.log("path", path.resolve(__dirname, fileName));
-//   const f = fs.readFileSync(path.resolve(__dirname, fileName), "utf-8");
-//   console.log(f);
-//   return f;
-// }
-// async function uploadAssetTheme(axios, id, page, pageName) {
-//   const body = {
-//     asset: {
-//       key: pageName,
-//       value: page,
-//     },
-//   };
-//   await axios.put(`/themes/${id}/assets.json`, body);
-//   console.log(`Upload page ${pageName}`);
-// }
+  // Make sure that our hasn't already been installed
+  if (newPage.includes(snippet)) {
+    console.log("Page already has the snippet installed");
+    return;
+  }
+  // Add our snippet
+  newPage = data.asset.value.replace(
+    "{% section 'header' %}",
+    `\n{% section 'header' %}\n${snippet}\n`
+  );
+  return newPage;
+}
 
-// async function getAssetThemeLiquid(id, axios) {
-//   const { data } = await axios.get(
-//     `/themes/${id}/assets.json?asset[key]=layout/theme.liquid`
-//   );
-//   console.log("Theme liquid file");
-//   if (!data.asset.value) {
-//     return;
-//   }
-//   const snippet = getFile("../../liquid/theme.liquid");
-//   let newPage = data.asset.value;
-//   if (newPage.includes(snippet)) {
-//     console.log("Page already has the snippet installed");
-//     return;
-//   }
-//   newPage = data.asset.value.replace(
-//     "{% section 'header' %}",
-//     `\n{% section 'header' %}\n${snippet}\n`
-//   );
-//   return newPage;
-// }
+/* Helper function used to read a local file */
+function getFile(fileName) {
+  return fs.readFileSync(path.resolve(__dirname, fileName), "utf-8");
+}
+
+/* Helper function to upload the final page to Shopify */
+async function uploadAssetTheme(axios, id, page, pageName) {
+  // Implementing: https://shopify.dev/api/admin-rest/2021-07/resources/asset#[put]/admin/api/2021-07/themes/{theme_id}/assets.json
+  const body = {
+    asset: {
+      key: pageName,
+      value: page,
+    },
+  };
+  await axios.put(`/themes/${id}/assets.json`, body);
+  console.log(`Upload page ${pageName}`);
+}
