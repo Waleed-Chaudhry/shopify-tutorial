@@ -31,13 +31,13 @@ export async function updateTheme(shop, accessToken) {
 
   // Step 4: For the second snippet, we just need to upload
   // No need to download an existing snippet and modtify that
-  // const newSnippet = getFile("../../liquid/banner-app.liquid");
-  // await uploadAssetTheme(
-  //   axios,
-  //   mainThemeId,
-  //   newSnippet,
-  //   "snippets/banner-app.liquid"
-  // );
+  const newSnippet = getFile("../../liquid/waleed-test-app.liquid");
+  await uploadAssetTheme(
+    axios,
+    mainThemeId,
+    newSnippet,
+    "snippets/waleed-test-app.liquid"
+  );
 }
 
 /* Helper function to get Main Theme Id */
